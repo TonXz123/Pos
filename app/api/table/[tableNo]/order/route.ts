@@ -96,14 +96,14 @@ export async function POST(
         }
 
         // ✅ CRITICAL FIX: ดึงราคาจริงจาก Database — ห้ามใช้ราคาจาก client
-        const menuItemIds = items.map(i => i.menuItemId);
+        const menuItemIds = items.map((i: typeof items[0]) => i.menuItemId);
         const dbMenuItems = await prisma.menuItem.findMany({
             where: { id: { in: menuItemIds }, isAvailable: true },
             select: { id: true, basePrice: true, name: true },
         });
 
-        const priceMap = new Map(dbMenuItems.map(m => [m.id, Number(m.basePrice)]));
-        const nameMap = new Map(dbMenuItems.map(m => [m.id, m.name]));
+        const priceMap = new Map(dbMenuItems.map((m: typeof dbMenuItems[0]) => [m.id, Number(m.basePrice)]));
+        const nameMap = new Map(dbMenuItems.map((m: typeof dbMenuItems[0]) => [m.id, m.name]));
 
         // ตรวจสอบว่าเมนูที่สั่งมีอยู่จริงและพร้อมจำหน่าย
         for (const item of items) {
@@ -121,7 +121,7 @@ export async function POST(
             return sum + realPrice * item.quantity;
         }, 0);
 
-        const orderItems = items.map((item) => ({
+        const orderItems = items.map((item: typeof items[0]) => ({
             menuItemId: item.menuItemId,
             menuItemName: nameMap.get(item.menuItemId) || item.menuItemName,
             quantity: item.quantity,
