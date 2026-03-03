@@ -1,4 +1,6 @@
 Live demo https://demoposbytonxz.vercel.app
+username: admin
+password: 123456
 
 # 🍽️ POS System — ระบบจัดการร้านอาหาร
 
