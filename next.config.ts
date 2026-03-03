@@ -32,7 +32,7 @@ const nextConfig: NextConfig = {
           {
             key: "Content-Security-Policy",
             value:
-              "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' https://ufs.sh https://utfs.io data: blob:; connect-src 'self' https://ufs.sh https://utfs.io; font-src 'self' https://fonts.gstatic.com; frame-ancestors 'none';",
+              "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src * data: blob:; connect-src 'self' https://ufs.sh https://utfs.io; font-src 'self' https://fonts.gstatic.com; frame-ancestors 'none';",
           },
         ],
       },
