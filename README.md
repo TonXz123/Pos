@@ -35,8 +35,8 @@
 ### 1. Clone โปรเจค
 
 ```bash
-git clone https://github.com/<your-username>/pos-system.git
-cd pos-system
+git clone https://github.com/TonXz123/Pos.git
+cd Pos
 ```
 
 ### 2. ติดตั้ง Dependencies

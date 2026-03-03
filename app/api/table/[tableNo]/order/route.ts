@@ -116,8 +116,8 @@ export async function POST(
         }
 
         // คำนวณราคาจริงจาก DB
-        const totalPrice = items.reduce((sum, item) => {
-            const realPrice = priceMap.get(item.menuItemId)!;
+        const totalPrice = items.reduce((sum: number, item: typeof items[0]) => {
+            const realPrice = Number(priceMap.get(item.menuItemId) || 0);
             return sum + realPrice * item.quantity;
         }, 0);
 
