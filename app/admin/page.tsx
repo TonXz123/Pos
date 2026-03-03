@@ -15,6 +15,7 @@ export default function AdminPage() {
     // โหลดค่า activeTab จาก localStorage (client-side only)
     useEffect(() => {
         const saved = localStorage.getItem('activeTab');
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         if (saved) setActiveTab(saved);
     }, []);
 

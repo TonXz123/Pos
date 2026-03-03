@@ -3,11 +3,20 @@
 import { useEffect, useState } from 'react';
 import {
     ClipboardList,
-    Users,
     DollarSign,
     Package
 } from 'lucide-react';
 import { SalesChart } from './sales-chart';
+
+interface OrderQueueItem {
+    id: string;
+    menuItemName: string;
+    optionsText?: string | null;
+    quantity: number;
+    status: string;
+    createdAt: Date | string;
+    tableNo: number;
+}
 
 interface TableData {
     id: number;
@@ -42,11 +51,10 @@ export const StatusBadge = ({ status }: { status: string }) => {
 
 export const DashboardTab = () => {
     const [stats, setStats] = useState<DashboardStats | null>(null);
-    const [loading, setLoading] = useState(true);
     const [tables, setTables] = useState<TableData[]>([]);
 
     // Queue state
-    const [orderQueue, setOrderQueue] = useState<any[]>([]);
+    const [orderQueue, setOrderQueue] = useState<OrderQueueItem[]>([]);
     const [queueLoading, setQueueLoading] = useState(true);
 
     useEffect(() => {
@@ -57,8 +65,6 @@ export const DashboardTab = () => {
                 setStats(data);
             } catch (error) {
                 console.error("Failed to fetch dashboard data", error);
-            } finally {
-                setLoading(false);
             }
         };
         const fetchTables = async () => {

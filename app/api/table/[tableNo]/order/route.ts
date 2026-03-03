@@ -102,8 +102,8 @@ export async function POST(
             select: { id: true, basePrice: true, name: true },
         });
 
-        const priceMap = new Map(dbMenuItems.map((m: typeof dbMenuItems[0]) => [m.id, Number(m.basePrice)]));
-        const nameMap = new Map(dbMenuItems.map((m: typeof dbMenuItems[0]) => [m.id, m.name]));
+        const priceMap = new Map<string, number>(dbMenuItems.map((m: typeof dbMenuItems[0]) => [m.id, Number(m.basePrice)]));
+        const nameMap = new Map<string, string>(dbMenuItems.map((m: typeof dbMenuItems[0]) => [m.id, m.name]));
 
         // ตรวจสอบว่าเมนูที่สั่งมีอยู่จริงและพร้อมจำหน่าย
         for (const item of items) {
@@ -125,7 +125,7 @@ export async function POST(
             menuItemId: item.menuItemId,
             menuItemName: nameMap.get(item.menuItemId) || item.menuItemName,
             quantity: item.quantity,
-            price: priceMap.get(item.menuItemId)! * item.quantity,
+            price: Number(priceMap.get(item.menuItemId) || 0) * item.quantity,
             optionsText: item.optionsText || null,
             status: "PENDING" as const,
         }));
