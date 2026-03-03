@@ -46,7 +46,7 @@ export async function GET() {
         }
 
         // รวมยอดขายเข้าในแต่ละวัน
-        orders.forEach(order => {
+        orders.forEach((order: typeof orders[number]) => {
             const d = new Date(order.createdAt);
             d.setHours(d.getHours() + 7); // แปลงเป็นเวลาไทย
             const dString = d.toISOString().split('T')[0];
