@@ -135,10 +135,4 @@ Table ──< Order
    - `AUTH_SECRET`
 4. Deploy!
 
-## 📝 License
-
-MIT — ใช้ได้ฟรี ดัดแปลงได้ตามสะดวก
-
----
-
 **Made with ❤️ for learning purposes**

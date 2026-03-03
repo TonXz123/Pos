@@ -30,7 +30,7 @@ export async function GET() {
         });
 
         // Format for frontend
-        const formattedQueue = activeQueue.map(item => ({
+        const formattedQueue = activeQueue.map((item: typeof activeQueue[number]) => ({
             id: item.id,
             menuItemName: item.menuItemName,
             optionsText: item.optionsText,
