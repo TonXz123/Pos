@@ -1,3 +1,5 @@
+Live demo https://demoposbytonxz.vercel.app
+
 # 🍽️ POS System — ระบบจัดการร้านอาหาร
 
 ![Dashboard Preview](image.png)
