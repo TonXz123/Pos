@@ -1,0 +1,165 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// --- 1. ระบบผู้ใช้งาน ---
+model User {
+  id        String   @id @default(cuid())
+  username  String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  orders             Order[]
+  cashDrawerSessions CashDrawerSession[]
+
+  @@map("users")
+}
+
+// --- 2. ระบบโต๊ะ ---
+model Table {
+  id                  String      @id @default(cuid())
+  tableNo             Int         @unique
+  status              TableStatus @default(AVAILABLE) // 🌟 ตอนนี้จะรองรับ PENDING ได้แล้ว
+  currentSessionToken String?     @unique @map("current_session_token")
+  createdAt           DateTime    @default(now())
+  updatedAt           DateTime    @updatedAt
+
+  orders Order[]
+
+  @@map("tables")
+}
+
+// --- 3. ระบบเมนูและตัวเลือก ---
+model MenuItem {
+  id          String   @id @default(cuid())
+  name        String
+  category    String
+  image       String?
+  basePrice   Decimal  @db.Decimal(10, 2)
+  isAvailable Boolean  @default(true)
+  createdAt   DateTime @default(now()) // 🌟 เพิ่ม
+  updatedAt   DateTime @updatedAt // 🌟 เพิ่ม
+
+  options    MenuOption[]
+  orderItems OrderItem[] // 🌟 เพิ่ม: ให้เชื่อมกลับจาก OrderItem ได้
+
+  @@map("menu_items")
+}
+
+model MenuOption {
+  id              String  @id @default(cuid())
+  menuItemId      String  @map("menu_item_id")
+  groupName       String
+  name            String
+  additionalPrice Decimal @db.Decimal(10, 2)
+
+  menuItem MenuItem @relation(fields: [menuItemId], references: [id])
+
+  @@map("menu_options")
+}
+
+// --- 4. ระบบการสั่งซื้อ ---
+model Order {
+  id           String      @id @default(cuid())
+  tableId      String      @map("table_id")
+  userId       String?     @map("user_id")
+  sessionToken String?     @map("session_token") // 🌟 เพิ่มเข้ามา
+  status       OrderStatus @default(OPEN) // 🌟 ตอนนี้จะรองรับ PENDING_APPROVAL ได้แล้ว
+  totalPrice   Decimal     @db.Decimal(10, 2)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  table   Table       @relation(fields: [tableId], references: [id])
+  user    User?       @relation(fields: [userId], references: [id])
+  items   OrderItem[]
+  payment Payment?
+
+  @@map("orders")
+}
+
+// --- 5. ระบบชำระเงิน ---
+model Payment {
+  id                  String        @id @default(cuid())
+  orderId             String        @unique @map("order_id")
+  method              PaymentMethod @default(CASH)
+  amountDue           Decimal       @db.Decimal(10, 2) // ยอดที่ต้องจ่าย
+  amountPaid          Decimal       @db.Decimal(10, 2) // ยอดที่รับมา
+  change              Decimal       @default(0) @db.Decimal(10, 2) // เงินทอน
+  cashDrawerSessionId String?       @map("cash_drawer_session_id")
+  createdAt           DateTime      @default(now())
+
+  order             Order              @relation(fields: [orderId], references: [id])
+  cashDrawerSession CashDrawerSession? @relation(fields: [cashDrawerSessionId], references: [id])
+
+  @@map("payments")
+}
+
+// --- 6. ระบบเงินตั้งต้น (กะ) ---
+model CashDrawerSession {
+  id           String    @id @default(cuid())
+  userId       String    @map("user_id")
+  startingCash Decimal   @db.Decimal(10, 2) // เงินตั้งต้นที่ไว้ทอน
+  closingCash  Decimal?  @db.Decimal(10, 2) // เงินจริงในลิ้นชักตอนปิดกะ
+  closedAt     DateTime? // null = กะยังเปิดอยู่
+  note         String? // หมายเหตุ
+  createdAt    DateTime  @default(now())
+
+  user     User      @relation(fields: [userId], references: [id])
+  payments Payment[]
+
+  @@map("cash_drawer_sessions")
+}
+
+model OrderItem {
+  id           String     @id @default(cuid())
+  orderId      String     @map("order_id")
+  menuItemId   String?    @map("menu_item_id") // 🌟 เพิ่ม: เพื่อเอาไว้ทำ Report ยอดขายเมนู
+  menuItemName String // ชื่อเมนู (Snapshot กันเมนูเปลี่ยนชื่อ)
+  optionsText  String? // 🌟 เพิ่ม: เก็บ Option ที่ลูกค้าเลือก (เช่น "เส้นหมี่, ไม่ผัก")
+  quantity     Int        @default(1)
+  price        Decimal    @db.Decimal(10, 2)
+  status       ItemStatus @default(PENDING) // 🌟 เพิ่ม: สถานะอาหารจานนี้
+  createdAt    DateTime   @default(now()) // 🌟 เพิ่ม
+
+  order    Order     @relation(fields: [orderId], references: [id])
+  menuItem MenuItem? @relation(fields: [menuItemId], references: [id], onDelete: SetNull) // 🌟 ถ้าลบเมนูทิ้ง บิลเก่าจะได้ไม่พัง
+
+  @@map("order_items")
+}
+
+// --- ENUMS ---
+enum Role {
+  ADMIN
+}
+
+enum TableStatus {
+  AVAILABLE
+  PENDING // 🌟 เพิ่ม
+  OCCUPIED
+}
+
+enum OrderStatus {
+  PENDING_APPROVAL // 🌟 เพิ่ม
+  OPEN
+  PAID
+  CANCELLED
+}
+
+// 🌟 เพิ่ม: สถานะของอาหารแต่ละจาน
+enum ItemStatus {
+  PENDING // รอทำ
+  COOKING // กำลังทำ
+  SERVED // เสิร์ฟแล้ว
+  CANCELLED // ยกเลิก
+}
+
+// 🌟 เพิ่ม: วิธีชำระเงิน
+enum PaymentMethod {
+  CASH // เงินสด
+  TRANSFER // เงินโอน
+}
